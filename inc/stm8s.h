@@ -82,6 +82,8 @@
  #define _COSMIC_
 #elif defined(__RCST7__)
  #define _RAISONANCE_
+#elif defined(__SDCC_stm8)
+ #define _SDCC_
 #elif defined(__ICCSTM8__)
  #define _IAR_
 #else
@@ -137,6 +139,12 @@
   /*!< Used with memory Models for code less than 64K */
   #define MEMCPY memcpy
  #endif /* STM8S208 or STM8S207 or STM8S007 or STM8AF62Ax or STM8AF52Ax */ 
+ #elif defined (_SDCC_)
+  #define FAR  __far
+  #define NEAR __near
+  #define TINY __tiny
+  #define EEPROM __eeprom
+  #define CONST  const
 #else /*_IAR_*/
  #define FAR  __far
  #define NEAR __near
@@ -206,6 +214,9 @@
 #define     __O     volatile         /*!< defines 'write only' permissions    */
 #define     __IO    volatile         /*!< defines 'read / write' permissions  */
 
+#if defined(_SDCC_)
+  #include <stdint.h>
+#else
 /*!< Signed integer types  */
 typedef   signed char     int8_t;
 typedef   signed short    int16_t;
@@ -215,6 +226,7 @@ typedef   signed long     int32_t;
 typedef unsigned char     uint8_t;
 typedef unsigned short    uint16_t;
 typedef unsigned long     uint32_t;
+#endif
 
 /*!< STM8 Standard Peripheral Library old types (maintained for legacy purpose) */
 
@@ -2729,6 +2741,15 @@ CFG_TypeDef;
  #define trap()                {_asm("trap\n");} /* Trap (soft IT) */
  #define wfi()                 {_asm("wfi\n");}  /* Wait For Interrupt */
  #define halt()                {_asm("halt\n");} /* Halt */
+#elif defined(_SDCC_)
+ #define enableInterrupts()    {__asm__("rim\n");}  /* enable interrupts */
+ #define disableInterrupts()   {__asm__("sim\n");}  /* disable interrupts */
+ #define rim()                 {__asm__("rim\n");}  /* enable interrupts */
+ #define sim()                 {__asm__("sim\n");}  /* disable interrupts */
+ #define nop()                 {__asm__("nop\n");}  /* No Operation */
+ #define trap()                {__asm__("trap\n");} /* Trap (soft IT) */
+ #define wfi()                 {__asm__("wfi\n");}  /* Wait For Interrupt */
+ #define halt()                {__asm__("halt\n");} /* Halt */
 #else /*_IAR_*/
  #include <intrinsics.h>
  #define enableInterrupts()    __enable_interrupt()   /* enable interrupts */
@@ -2752,6 +2773,11 @@ CFG_TypeDef;
  #define INTERRUPT_HANDLER(a,b) void a(void) interrupt b
  #define INTERRUPT_HANDLER_TRAP(a) void a(void) trap
 #endif /* _RAISONANCE_ */
+
+#ifdef _SDCC_
+  #define INTERRUPT_HANDLER(a,b) void a(void) __interrupt(b)
+  #define INTERRUPT_HANDLER_TRAP(a) void a(void) __trap
+#endif /* _SDCC_ */
 
 #ifdef _IAR_
  #define STRINGVECTOR(x) #x
