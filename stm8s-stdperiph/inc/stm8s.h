@@ -141,7 +141,7 @@
  #endif /* STM8S208 or STM8S207 or STM8S007 or STM8AF62Ax or STM8AF52Ax */ 
  #elif defined (_SDCC_)
   #define FAR  __far
-  #define NEAR __near
+  #define NEAR
   #define TINY __tiny
   #define EEPROM __eeprom
   #define CONST  const
