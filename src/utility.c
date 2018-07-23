@@ -30,13 +30,13 @@
 
 void cmdBufReset(pCmdBuf pbuf)
 {
+    memset(pbuf->buf, '\0', sizeof(pbuf->buf));
     pbuf->rpos = 0;
     pbuf->wpos = 0;
 }
 
 void cmdBufInit(pCmdBuf pbuf)
 {
-    memset(pbuf->buf, '\0', sizeof(pbuf->buf));
     cmdBufReset(pbuf);
 }
 
@@ -47,7 +47,10 @@ void cmdBufPushEnd(pCmdBuf pbuf)
 
 void cmdBufPushByte(pCmdBuf pbuf, char cbyte)
 {
-    if (pbuf->wpos == 0 && cbyte != '@') {
+    if (cbyte == '@') {
+        cmdBufReset(pbuf);
+    } else if (pbuf->wpos > 0 && pbuf->buf[0] != '@') {
+        cmdBufReset(pbuf);
         return;
     }
     pbuf->buf[pbuf->wpos++] = cbyte;
