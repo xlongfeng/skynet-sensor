@@ -49,7 +49,7 @@ TEST(SmallStdioTest, SmallStdio) {
 TEST(CmdBufTest, CmdBuf) {
     CmdBuf cmd;
     pCmdBuf pCmd = &cmd;
-#define ACTION_LEN_MAX      8
+#define ACTION_LEN_MAX      16
     char action[ACTION_LEN_MAX];
     uint8_t addr;
     uint16_t arg;
@@ -138,5 +138,17 @@ TEST(CmdBufTest, CmdBuf) {
     EXPECT_STREQ(action, "SetID");
     cmdBufGetArg(pCmd, &arg);
     EXPECT_EQ(arg, 1);
+    EXPECT_EQ(cmdBufValidation(pCmd), CMD_BUF_OK);
+
+    cmdBufReset(pCmd);
+    cmdBufPushString(pCmd, "@01,Heartbeat,05,ee\r\n");
+    cmdBufPushEnd(pCmd);
+    EXPECT_GT(cmdBufSize(pCmd), 0);
+    cmdBufGetAddr(pCmd, &addr);
+    EXPECT_EQ(addr, 0x01);
+    cmdBufGetAction(pCmd, action, ACTION_LEN_MAX);
+    EXPECT_STREQ(action, "Heartbeat");
+    cmdBufGetArg(pCmd, &arg);
+    EXPECT_EQ(arg, 5);
     EXPECT_EQ(cmdBufValidation(pCmd), CMD_BUF_OK);
 }

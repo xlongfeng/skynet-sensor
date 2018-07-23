@@ -25,7 +25,7 @@
 
 #include "os.h"
 
-uint8_t device_id = 0xff, device_type = 0xff;
+uint8_t device_id = 0x01, device_type = 0xff;
 
 void write_device_id(uint8_t id)
 {

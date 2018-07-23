@@ -75,8 +75,10 @@ void led_heartbeat(void)
 
 static CmdBuf cmd;
 static pCmdBuf pCmd = &cmd;
-#define ACTION_LEN_MAX      8
+#define ACTION_LEN_MAX      16
 char action[ACTION_LEN_MAX];
+static uint8_t heartbeat = 0;
+
 uint32_t live_tick;
 
 void cmd_transaction(void)
@@ -119,6 +121,11 @@ void cmd_transaction(void)
                         hdprintf("%s", pCmd->buf);
                     } else if (strcmp(action, "GetType") == 0 && addr == read_device_id()) {
                         arg = read_device_type();
+                        cmdBufBuild(pCmd, addr, action, arg);
+                        hdprintf("%s", pCmd->buf);
+                    } else if (strcmp(action, "Heartbeat") == 0 && addr == read_device_id()) {
+                        arg &= 0x00ff;
+                        arg |= (uint16_t)++heartbeat << 8;
                         cmdBufBuild(pCmd, addr, action, arg);
                         hdprintf("%s", pCmd->buf);
                     }
