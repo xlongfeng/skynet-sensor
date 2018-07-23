@@ -109,29 +109,12 @@ void FLASH_Unlock(FLASH_MemType_TypeDef FLASH_MemType)
   *         This parameter can be a value of @ref FLASH_MemType_TypeDef
   * @retval None
   */
-void FLASH_Lock(FLASH_MemType_TypeDef FLASH_MemType)
-{
-  /* Check parameter */
-  assert_param(IS_MEMORY_TYPE_OK(FLASH_MemType));
-  
-  /* Lock memory */
-  FLASH->IAPSR &= (uint8_t)FLASH_MemType;
-}
 
 /**
   * @brief  DeInitializes the FLASH registers to their default reset values.
   * @param  None
   * @retval None
   */
-void FLASH_DeInit(void)
-{
-  FLASH->CR1 = FLASH_CR1_RESET_VALUE;
-  FLASH->CR2 = FLASH_CR2_RESET_VALUE;
-  FLASH->NCR2 = FLASH_NCR2_RESET_VALUE;
-  FLASH->IAPSR &= (uint8_t)(~FLASH_IAPSR_DUL);
-  FLASH->IAPSR &= (uint8_t)(~FLASH_IAPSR_PUL);
-  (void) FLASH->IAPSR; /* Reading of this register causes the clearing of status flags */
-}
 
 /**
   * @brief  Enables or Disables the Flash interrupt mode
@@ -139,20 +122,6 @@ void FLASH_DeInit(void)
   *         This parameter can be a value of @ref FunctionalState enumeration.
   * @retval None
   */
-void FLASH_ITConfig(FunctionalState NewState)
-{
-  /* Check parameter */
-  assert_param(IS_FUNCTIONALSTATE_OK(NewState));
-  
-  if(NewState != DISABLE)
-  {
-    FLASH->CR1 |= FLASH_CR1_IE; /* Enables the interrupt sources */
-  }
-  else
-  {
-    FLASH->CR1 &= (uint8_t)(~FLASH_CR1_IE); /* Disables the interrupt sources */
-  }
-}
 
 /**
   * @brief  Erases one byte in the program or data EEPROM memory
@@ -161,14 +130,6 @@ void FLASH_ITConfig(FunctionalState NewState)
   * @param  Address : Address of the byte to erase
   * @retval None
   */
-void FLASH_EraseByte(uint32_t Address)
-{
-  /* Check parameter */
-  assert_param(IS_FLASH_ADDRESS_OK(Address));
-  
-  /* Erase byte */
-  *(PointerAttr uint8_t*) (MemoryAddressCast)Address = FLASH_CLEAR_BYTE; 
-}
 
 /**
   * @brief  Programs one byte in program or data EEPROM memory
@@ -209,24 +170,6 @@ uint8_t FLASH_ReadByte(uint32_t Address)
   * @param  Data : Value to be programmed
   * @retval None
   */
-void FLASH_ProgramWord(uint32_t Address, uint32_t Data)
-{
-  /* Check parameters */
-  assert_param(IS_FLASH_ADDRESS_OK(Address));
-  
-  /* Enable Word Write Once */
-  FLASH->CR2 |= FLASH_CR2_WPRG;
-  FLASH->NCR2 &= (uint8_t)(~FLASH_NCR2_NWPRG);
-  
-  /* Write one byte - from lowest address*/
-  *((PointerAttr uint8_t*)(MemoryAddressCast)Address)       = *((uint8_t*)(&Data));
-  /* Write one byte*/
-  *(((PointerAttr uint8_t*)(MemoryAddressCast)Address) + 1) = *((uint8_t*)(&Data)+1); 
-  /* Write one byte*/    
-  *(((PointerAttr uint8_t*)(MemoryAddressCast)Address) + 2) = *((uint8_t*)(&Data)+2); 
-  /* Write one byte - from higher address*/
-  *(((PointerAttr uint8_t*)(MemoryAddressCast)Address) + 3) = *((uint8_t*)(&Data)+3); 
-}
 
 /**
   * @brief  Programs option byte
@@ -234,102 +177,18 @@ void FLASH_ProgramWord(uint32_t Address, uint32_t Data)
   * @param  Data : Value to write
   * @retval None
   */
-void FLASH_ProgramOptionByte(uint16_t Address, uint8_t Data)
-{
-  /* Check parameter */
-  assert_param(IS_OPTION_BYTE_ADDRESS_OK(Address));
-  
-  /* Enable write access to option bytes */
-  FLASH->CR2 |= FLASH_CR2_OPT;
-  FLASH->NCR2 &= (uint8_t)(~FLASH_NCR2_NOPT);
-  
-  /* check if the option byte to program is ROP*/
-  if(Address == 0x4800)
-  {
-    /* Program option byte*/
-    *((NEAR uint8_t*)Address) = Data;
-  }
-  else
-  {
-    /* Program option byte and his complement */
-    *((NEAR uint8_t*)Address) = Data;
-    *((NEAR uint8_t*)((uint16_t)(Address + 1))) = (uint8_t)(~Data);
-  }
-  FLASH_WaitForLastOperation(FLASH_MEMTYPE_PROG);
-  
-  /* Disable write access to option bytes */
-  FLASH->CR2 &= (uint8_t)(~FLASH_CR2_OPT);
-  FLASH->NCR2 |= FLASH_NCR2_NOPT;
-}
 
 /**
   * @brief  Erases option byte
   * @param  Address : Option byte address to erase
   * @retval None
   */
-void FLASH_EraseOptionByte(uint16_t Address)
-{
-  /* Check parameter */
-  assert_param(IS_OPTION_BYTE_ADDRESS_OK(Address));
-  
-  /* Enable write access to option bytes */
-  FLASH->CR2 |= FLASH_CR2_OPT;
-  FLASH->NCR2 &= (uint8_t)(~FLASH_NCR2_NOPT);
-  
-  /* check if the option byte to erase is ROP */
-  if(Address == 0x4800)
-  {
-    /* Erase option byte */
-    *((NEAR uint8_t*)Address) = FLASH_CLEAR_BYTE;
-  }
-  else
-  {
-    /* Erase option byte and his complement */
-    *((NEAR uint8_t*)Address) = FLASH_CLEAR_BYTE;
-    *((NEAR uint8_t*)((uint16_t)(Address + (uint16_t)1 ))) = FLASH_SET_BYTE;
-  }
-  FLASH_WaitForLastOperation(FLASH_MEMTYPE_PROG);
-  
-  /* Disable write access to option bytes */
-  FLASH->CR2 &= (uint8_t)(~FLASH_CR2_OPT);
-  FLASH->NCR2 |= FLASH_NCR2_NOPT;
-}
 
 /**
   * @brief  Reads one option byte
   * @param  Address  option byte address to read.
   * @retval Option byte read value + its complement
   */
-uint16_t FLASH_ReadOptionByte(uint16_t Address)
-{
-  uint8_t value_optbyte, value_optbyte_complement = 0;
-  uint16_t res_value = 0;
-  
-  /* Check parameter */
-  assert_param(IS_OPTION_BYTE_ADDRESS_OK(Address));
-    
-  value_optbyte = *((NEAR uint8_t*)Address); /* Read option byte */
-  value_optbyte_complement = *(((NEAR uint8_t*)Address) + 1); /* Read option byte complement */
-  
-  /* Read-out protection option byte */
-  if(Address == 0x4800)	 
-  {
-    res_value =	 value_optbyte;
-  }
-  else
-  {
-    if(value_optbyte == (uint8_t)(~value_optbyte_complement))
-    {
-      res_value = (uint16_t)((uint16_t)value_optbyte << 8);
-      res_value = res_value | (uint16_t)value_optbyte_complement;
-    }
-    else
-    {
-      res_value = FLASH_OPTIONBYTE_ERROR;
-    }
-  }
-  return(res_value);
-}
 
 /**
   * @brief  Select the Flash behaviour in low power mode
@@ -337,17 +196,6 @@ uint16_t FLASH_ReadOptionByte(uint16_t Address)
   *         This parameter can be any of the @ref FLASH_LPMode_TypeDef values.
   * @retval None
   */
-void FLASH_SetLowPowerMode(FLASH_LPMode_TypeDef FLASH_LPMode)
-{
-  /* Check parameter */
-  assert_param(IS_FLASH_LOW_POWER_MODE_OK(FLASH_LPMode));
-  
-  /* Clears the two bits */
-  FLASH->CR1 &= (uint8_t)(~(FLASH_CR1_HALT | FLASH_CR1_AHALT)); 
-  
-  /* Sets the new mode */
-  FLASH->CR1 |= (uint8_t)FLASH_LPMode; 
-}
 
 /**
   * @brief  Sets the fixed programming time
@@ -369,42 +217,18 @@ void FLASH_SetProgrammingTime(FLASH_ProgramTime_TypeDef FLASH_ProgTime)
   * @param  None
   * @retval FLASH_LPMode_TypeDef Flash behaviour type in low power mode
   */
-FLASH_LPMode_TypeDef FLASH_GetLowPowerMode(void)
-{
-  return((FLASH_LPMode_TypeDef)(FLASH->CR1 & (uint8_t)(FLASH_CR1_HALT | FLASH_CR1_AHALT)));
-}
 
 /**
   * @brief  Returns the fixed programming time
   * @param  None
   * @retval FLASH_ProgramTime_TypeDef Fixed programming time value
   */
-FLASH_ProgramTime_TypeDef FLASH_GetProgrammingTime(void)
-{
-  return((FLASH_ProgramTime_TypeDef)(FLASH->CR1 & FLASH_CR1_FIX));
-}
 
 /**
   * @brief  Returns the Boot memory size in bytes
   * @param  None
   * @retval Boot memory size in bytes
   */
-uint32_t FLASH_GetBootSize(void)
-{
-  uint32_t temp = 0;
-  
-  /* Calculates the number of bytes */
-  temp = (uint32_t)((uint32_t)FLASH->FPR * (uint32_t)512);
-  
-  /* Correction because size of 127.5 kb doesn't exist */
-  if(FLASH->FPR == 0xFF)
-  {
-    temp += 512;
-  }
-  
-  /* Return value */
-  return(temp);
-}
 
 /**
   * @brief  Checks whether the specified SPI flag is set or not.
@@ -595,53 +419,6 @@ IN_RAM(FLASH_Status_TypeDef FLASH_WaitForLastOperation(FLASH_MemType_TypeDef FLA
   * @param  BlockNum : Indicates the block number to erase
   * @retval None.
   */
-IN_RAM(void FLASH_EraseBlock(uint16_t BlockNum, FLASH_MemType_TypeDef FLASH_MemType))
-{
-  uint32_t startaddress = 0;
-  
-#if defined(STM8S105) || defined(STM8S005) || defined(STM8S103) || defined(STM8S003) || \
-  defined (STM8S903) || defined (STM8AF626x) || defined (STM8AF622x)
-    uint32_t PointerAttr  *pwFlash;
-#elif defined (STM8S208) || defined(STM8S207) || defined(STM8S007) || defined (STM8AF62Ax) || defined (STM8AF52Ax) 
-  uint8_t PointerAttr  *pwFlash;
-#endif
-  
-  /* Check parameters */
-  assert_param(IS_MEMORY_TYPE_OK(FLASH_MemType));
-  if(FLASH_MemType == FLASH_MEMTYPE_PROG)
-  {
-    assert_param(IS_FLASH_PROG_BLOCK_NUMBER_OK(BlockNum));
-    startaddress = FLASH_PROG_START_PHYSICAL_ADDRESS;
-  }
-  else
-  {
-    assert_param(IS_FLASH_DATA_BLOCK_NUMBER_OK(BlockNum));
-    startaddress = FLASH_DATA_START_PHYSICAL_ADDRESS;
-  }
-  
-  /* Point to the first block address */
-#if defined (STM8S208) || defined(STM8S207) || defined(STM8S007) || defined (STM8AF62Ax) || defined (STM8AF52Ax)
-  pwFlash = (PointerAttr uint8_t *)(MemoryAddressCast)(startaddress + ((uint32_t)BlockNum * FLASH_BLOCK_SIZE));
-#elif defined(STM8S105) || defined(STM8S005) || defined(STM8S103) || defined(STM8S003) || \
-  defined (STM8S903) || defined (STM8AF626x) || defined (STM8AF622x)
-    pwFlash = (PointerAttr uint32_t *)(MemoryAddressCast)(startaddress + ((uint32_t)BlockNum * FLASH_BLOCK_SIZE));
-#endif	/* STM8S208, STM8S207 */
-  
-  /* Enable erase block mode */
-  FLASH->CR2 |= FLASH_CR2_ERASE;
-  FLASH->NCR2 &= (uint8_t)(~FLASH_NCR2_NERASE);
-  
-#if defined(STM8S105) || defined(STM8S005) || defined(STM8S103) || defined(STM8S003) ||  \
-  defined (STM8S903) || defined (STM8AF626x) || defined (STM8AF622x)
-    *pwFlash = (uint32_t)0;
-#elif defined (STM8S208) || defined(STM8S207) || defined(STM8S007) || defined (STM8AF62Ax) || \
-  defined (STM8AF52Ax)
-    *pwFlash = (uint8_t)0;
-  *(pwFlash + 1) = (uint8_t)0;
-  *(pwFlash + 2) = (uint8_t)0;
-  *(pwFlash + 3) = (uint8_t)0;    
-#endif
-}
 
 /**
   * @brief  Programs a memory block
@@ -652,49 +429,6 @@ IN_RAM(void FLASH_EraseBlock(uint16_t BlockNum, FLASH_MemType_TypeDef FLASH_MemT
   * @param  Buffer : Pointer to buffer containing source data.
   * @retval None.
   */
-IN_RAM(void FLASH_ProgramBlock(uint16_t BlockNum, FLASH_MemType_TypeDef FLASH_MemType, 
-                        FLASH_ProgramMode_TypeDef FLASH_ProgMode, uint8_t *Buffer))
-{
-  uint16_t Count = 0;
-  uint32_t startaddress = 0;
-  
-  /* Check parameters */
-  assert_param(IS_MEMORY_TYPE_OK(FLASH_MemType));
-  assert_param(IS_FLASH_PROGRAM_MODE_OK(FLASH_ProgMode));
-  if(FLASH_MemType == FLASH_MEMTYPE_PROG)
-  {
-    assert_param(IS_FLASH_PROG_BLOCK_NUMBER_OK(BlockNum));
-    startaddress = FLASH_PROG_START_PHYSICAL_ADDRESS;
-  }
-  else
-  {
-    assert_param(IS_FLASH_DATA_BLOCK_NUMBER_OK(BlockNum));
-    startaddress = FLASH_DATA_START_PHYSICAL_ADDRESS;
-  }
-  
-  /* Point to the first block address */
-  startaddress = startaddress + ((uint32_t)BlockNum * FLASH_BLOCK_SIZE);
-  
-  /* Selection of Standard or Fast programming mode */
-  if(FLASH_ProgMode == FLASH_PROGRAMMODE_STANDARD)
-  {
-    /* Standard programming mode */ /*No need in standard mode */
-    FLASH->CR2 |= FLASH_CR2_PRG;
-    FLASH->NCR2 &= (uint8_t)(~FLASH_NCR2_NPRG);
-  }
-  else
-  {
-    /* Fast programming mode */
-    FLASH->CR2 |= FLASH_CR2_FPRG;
-    FLASH->NCR2 &= (uint8_t)(~FLASH_NCR2_NFPRG);
-  }
-  
-  /* Copy data bytes from RAM to FLASH memory */
-  for(Count = 0; Count < FLASH_BLOCK_SIZE; Count++)
-  {
-    *((PointerAttr uint8_t*) (MemoryAddressCast)startaddress + Count) = ((uint8_t)(Buffer[Count]));
-  }
-}
 
 #if defined (_COSMIC_) && defined (RAM_EXECUTION)
  /* End of FLASH_CODE section */

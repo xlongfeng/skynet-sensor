@@ -25,18 +25,25 @@
 #include "utility.h"
 
 TEST(SmallStdioTest, SmallStdio) {
-    printf_small((char *)"%c\n", 'X');
-    printf_small((char *)"%d\n", 12345);
-    printf_small((char *)"%s\n", "hello");
-    printf_small((char *)"%x\n", 0x1234);
-    printf_small((char *)"%x\n", 0x87654321);
-    printf_small((char *)"%lx\n", 0x87654321);
-
     char tmp[128];
-    EXPECT_EQ(sprintf_small(tmp, "%c\n", '0'), 2);
-    EXPECT_EQ(sprintf_small(tmp, "%d\n", 12345), 6);
-    EXPECT_EQ(sprintf_small(tmp, "%s\n", "hello"), 6);
-    EXPECT_EQ(sprintf_small(tmp, "%x\n", 0x1234), 5);
+
+    EXPECT_EQ(sprintf_small(tmp, "%c", 'X'), 1);
+    EXPECT_STREQ(tmp, "X");
+
+    EXPECT_EQ(sprintf_small(tmp, "%s", "hello"), 5);
+    EXPECT_STREQ(tmp, "hello");
+
+    EXPECT_EQ(sprintf_small(tmp, "%d", 12345), 5);
+    EXPECT_STREQ(tmp, "12345");
+
+    EXPECT_EQ(sprintf_small(tmp, "%ld", 1234567890), 10);
+    EXPECT_STREQ(tmp, "1234567890");
+
+    EXPECT_EQ(sprintf_small(tmp, "%x", 0x1234), 4);
+    EXPECT_STREQ(tmp, "1234");
+
+    EXPECT_EQ(sprintf_small(tmp, "%lx", 0x12345678), 8);
+    EXPECT_STREQ(tmp, "12345678");
 }
 
 TEST(CmdBufTest, CmdBuf) {

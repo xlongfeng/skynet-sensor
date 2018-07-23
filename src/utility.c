@@ -179,7 +179,14 @@ uint8_t cmdBufValidation(pCmdBuf pbuf)
     n = endptr - pbuf->buf;
     vCrc = cmdBufCalcCrc(pbuf, n);
 
-    return oCrc == vCrc ? CMD_BUF_OK : CMD_BUF_ERR;
+    if (oCrc == vCrc) {
+        return CMD_BUF_OK;
+    } else {
+#ifdef DEBUG
+        hdprintf("oCrc %x != vCrc %x\n", oCrc, vCrc);
+#endif
+        return CMD_BUF_ERR;
+    }
 }
 
 void cmdBufBuild(pCmdBuf pbuf, uint8_t addr, char *action, uint16_t arg)

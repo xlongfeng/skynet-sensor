@@ -25,6 +25,27 @@
 
 #include "os.h"
 
+uint8_t device_id = 0xff, device_type = 0xff;
+
+void write_device_id(uint8_t id)
+{
+    device_id = id;
+}
+
+uint8_t read_device_id(void)
+{
+    return device_id;
+}
+
+void write_device_type(uint8_t type)
+{
+    device_type = type;
+}
+
+uint8_t read_device_type(void)
+{
+    return device_type;
+}
 
 #ifdef DEBUG
 void display_banner(void)
@@ -35,11 +56,21 @@ void display_banner(void)
 }
 #endif
 
+void device_switch(DeviceType type)
+{
+
+}
+
 void os_init(void)
 {
 #ifdef DEBUG
     display_banner();
 #endif
+}
+
+uint16_t query_device(void)
+{
+    return 0x1234;
 }
 
 /*-------------------------------------------------------------------------

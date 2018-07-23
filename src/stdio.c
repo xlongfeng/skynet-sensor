@@ -137,7 +137,15 @@ static void put_char_to_string (char c, void* p)
     *(*buf)++ = c;
 }
 
-int sprintf_small(char *buf, const char *fmt,  ...)
+int vsprintf_small(char *buf, const char *fmt, va_list ap)
+{
+    int i;
+    i = _print_format(put_char_to_string, &buf, fmt, ap);
+    *buf = 0;
+    return i;
+}
+
+int sprintf_small(char *buf, const char *fmt, ...)
 {
     int i;
     va_list ap ;
@@ -154,7 +162,12 @@ static void put_char_to_stdout (char c, void* p)
     putchar(c);
 }
 
-void printf_small(char *fmt, ... )
+int vprintf_small (const char *format, va_list ap)
+{
+  return _print_format (put_char_to_stdout, NULL, format, ap);
+}
+
+void printf_small(char *fmt, ...)
 {
     va_list ap ;
     va_start(ap,fmt);

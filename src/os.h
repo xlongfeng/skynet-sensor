@@ -26,23 +26,23 @@
 
 #include <unistd.h>
 #include <stdint.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <pthread.h>
 
-__BEGIN_DECLS
+#ifdef	__cplusplus
+extern "C" {
+#endif // __cplusplus
 
 void _ultoa(unsigned long value, char* string, unsigned char radix);
 void _ltoa(long value, char* string, unsigned char radix);
 
 typedef void (*pfn_outputchar)(char c, void* p);
 
-int sprintf_small(char *buf, const char *fmt,  ...);
 void printf_small(char *fmt, ... );
 #define hdprintf(args...)       printf_small(args)
 
 #define watchdog()
-
-void os_init(void);
 
 #define TRUE                    true
 #define FALSE                   false
@@ -60,14 +60,15 @@ void os_init(void);
 #define GPIO_WriteReverse(a, b)
 #endif
 
-__END_DECLS
+#ifdef	__cplusplus
+}
+#endif // __cplusplus
 
 #else
 
 #include "stm8s.h"
 #include "stm8s_it.h"
 
-int sprintf_small(char *buf, const char *fmt,  ...);
 #define hdprintf(args...)       uart_mode_transmit();   \
                                 printf_small(args);     \
                                 uart_mode_receive()
@@ -75,8 +76,35 @@ int sprintf_small(char *buf, const char *fmt,  ...);
 void watchdog(void);
 void uart_mode_transmit(void);
 void uart_mode_receive(void);
-void os_init(void);
 
 #endif
+
+#ifdef	__cplusplus
+extern "C" {
+#endif // __cplusplus
+
+int vsprintf_small(char *buf, const char *fmt, va_list ap);
+int sprintf_small(char *buf, const char *fmt,  ...);
+int vprintf_small (const char *format, va_list ap);
+
+typedef enum {
+    WaterLevelDevice = 0x01,
+    UltrasonicDevice = 0x02,
+    UnknownDevice = 0xff,
+} DeviceType;
+
+uint16_t query_device(void);
+
+void write_device_id(uint8_t id);
+uint8_t read_device_id(void);
+void write_device_type(uint8_t type);
+uint8_t read_device_type(void);
+
+void device_switch(DeviceType type);
+void os_init(void);
+
+#ifdef	__cplusplus
+}
+#endif // __cplusplus
 
 #endif // __OS_H

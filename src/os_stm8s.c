@@ -99,6 +99,53 @@ void tim_init(void)
     TIM2_Cmd(ENABLE);
 }
 
+#define FLASH_ID_ADDR       ((uint32_t)((uint32_t)FLASH_DATA_START_PHYSICAL_ADDRESS + (uint32_t)0))
+#define FLASH_ID_NE_ADDR    ((uint32_t)((uint32_t)FLASH_DATA_START_PHYSICAL_ADDRESS + (uint32_t)1))
+
+#define FLASH_TYPE_ADDR     ((uint32_t)((uint32_t)FLASH_DATA_START_PHYSICAL_ADDRESS + (uint32_t)2))
+#define FLASH_TYPE_NE_ADDR  ((uint32_t)((uint32_t)FLASH_DATA_START_PHYSICAL_ADDRESS + (uint32_t)3))
+
+void write_device_id(uint8_t id)
+{
+    FLASH_ProgramByte(FLASH_ID_ADDR, id);
+    FLASH_WaitForLastOperation(FLASH_MEMTYPE_DATA);
+    FLASH_ProgramByte(FLASH_ID_NE_ADDR, (uint8_t)~id);
+    FLASH_WaitForLastOperation(FLASH_MEMTYPE_DATA);
+}
+
+uint8_t read_device_id(void)
+{
+    uint8_t id = FLASH_ReadByte(FLASH_ID_ADDR);
+    if ((uint8_t)~id == FLASH_ReadByte(FLASH_ID_NE_ADDR))
+        return id;
+    else
+        return 0xff;
+}
+
+void write_device_type(uint8_t type)
+{
+    FLASH_ProgramByte(FLASH_TYPE_ADDR, type);
+    FLASH_WaitForLastOperation(FLASH_MEMTYPE_DATA);
+    FLASH_ProgramByte(FLASH_TYPE_NE_ADDR, (uint8_t)~type);
+    FLASH_WaitForLastOperation(FLASH_MEMTYPE_DATA);
+}
+
+uint8_t read_device_type(void)
+{
+    uint8_t type = FLASH_ReadByte(FLASH_TYPE_ADDR);
+    if ((uint8_t)~type == FLASH_ReadByte(FLASH_TYPE_NE_ADDR))
+        return type;
+    else
+        return UnknownDevice;
+}
+
+void flash_init(void)
+{
+    FLASH_SetProgrammingTime(FLASH_PROGRAMTIME_STANDARD);
+    FLASH_Unlock(FLASH_MEMTYPE_DATA);
+    while (FLASH_GetFlagStatus(FLASH_FLAG_DUL) == RESET);
+}
+
 #ifdef DEBUG
 void display_banner(void)
 {
@@ -152,12 +199,96 @@ void reset_status(void)
 }
 #endif
 
+void waterlevel_disable(void)
+{
+    GPIO_Init(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_2, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_1, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_7, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_6, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_5, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_4, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);
+
+    GPIO_Init(GPIOB, (GPIO_Pin_TypeDef)GPIO_PIN_4, GPIO_MODE_IN_FL_NO_IT);
+}
+
+void waterlevel_enable(void)
+{
+    GPIO_Init(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_3, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_2, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_1, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_7, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_6, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_5, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_4, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_3, GPIO_MODE_IN_PU_NO_IT);
+
+    GPIO_Init(GPIOB, (GPIO_Pin_TypeDef)GPIO_PIN_4, GPIO_MODE_OUT_OD_LOW_SLOW);
+}
+
+uint16_t query_waterlevel(void)
+{
+    uint16_t value = 0;
+
+    waterlevel_enable();
+
+    if (GPIO_ReadInputPin(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_3) == RESET)
+        value = 1;
+
+    if (GPIO_ReadInputPin(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_4) == RESET)
+        value = 2;
+
+    if (GPIO_ReadInputPin(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_5) == RESET)
+        value = 3;
+
+    if (GPIO_ReadInputPin(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_6) == RESET)
+        value = 4;
+
+    if (GPIO_ReadInputPin(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_7) == RESET)
+        value = 5;
+
+    if (GPIO_ReadInputPin(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_1) == RESET)
+        value = 6;
+
+    if (GPIO_ReadInputPin(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_2) == RESET)
+        value = 7;
+
+    if (GPIO_ReadInputPin(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_3) == RESET)
+        value = 8;
+
+    waterlevel_disable();
+
+    return value;
+}
+
+void waterlevel_init(void)
+{
+    waterlevel_disable();
+}
+
+void device_switch(DeviceType type)
+{
+    switch (type) {
+    case WaterLevelDevice:
+        waterlevel_init();
+        break;
+    case UltrasonicDevice:
+        waterlevel_disable();
+        break;
+    default:
+        break;
+    }
+}
+
 void os_init(void)
 {
     iwdog_init();
     uart_init();
     led_init();
     tim_init();
+    flash_init();
+    device_switch(read_device_type());
 
 #ifdef DEBUG
     display_banner();
@@ -165,6 +296,23 @@ void os_init(void)
 #endif
 
     enableInterrupts();
+}
+
+uint16_t query_device(void)
+{
+    uint16_t value = 0xffff;
+
+    switch (read_device_type()) {
+    case WaterLevelDevice:
+        value = query_waterlevel();
+        break;
+    case UltrasonicDevice:
+        break;
+    default:
+        break;
+    }
+
+    return value;
 }
 
 int getchar(void)

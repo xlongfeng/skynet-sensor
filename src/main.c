@@ -98,30 +98,33 @@ void cmd_transaction(void)
                 if (cmdBufValidation(pCmd) == CMD_BUF_OK) {
                     live_tick = jiffies;
                     blinkPattern = BLINK_PATTERN_CONNECTED;
-                    if (strcmp(action, "Query") == 0) {
-                        arg = 1234;
+                    if (strcmp(action, "Query") == 0 && addr == read_device_id()) {
+                        arg = query_device();
                         cmdBufBuild(pCmd, addr, action, arg);
                         hdprintf("%s", pCmd->buf);
-                    } else if (strcmp(action, "SetID") == 0) {
-                        arg = 2345;
+                    } else if (strcmp(action, "SetID") == 0 && addr == 0x7e) {
+                        write_device_id(arg);
+                        arg = read_device_id();
                         cmdBufBuild(pCmd, addr, action, arg);
                         hdprintf("%s", pCmd->buf);
-                    } else if (strcmp(action, "GetID") == 0) {
-                        arg = 3456;
+                    } else if (strcmp(action, "GetID") == 0 && addr == 0x7e) {
+                        arg = read_device_id();
                         cmdBufBuild(pCmd, addr, action, arg);
                         hdprintf("%s", pCmd->buf);
-                    } else if (strcmp(action, "SetType") == 0) {
-                        arg = 4567;
+                    } else if (strcmp(action, "SetType") == 0 && addr == read_device_id()) {
+                        write_device_type(arg);
+                        device_switch(read_device_type());
+                        arg = read_device_type();
                         cmdBufBuild(pCmd, addr, action, arg);
                         hdprintf("%s", pCmd->buf);
-                    } else if (strcmp(action, "GetType") == 0) {
-                        arg = 5768;
+                    } else if (strcmp(action, "GetType") == 0 && addr == read_device_id()) {
+                        arg = read_device_type();
                         cmdBufBuild(pCmd, addr, action, arg);
                         hdprintf("%s", pCmd->buf);
                     }
 #ifdef DEBUG
                     else {
-                        hdprintf("Unknow action %s\n", action);
+                        hdprintf("Unknown action %s, %x, %x\n", action, addr, read_device_id());
                     }
 #endif
                 }
