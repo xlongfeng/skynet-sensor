@@ -151,6 +151,17 @@ CONST uint8_t CLKPrescTable[8] = {1, 2, 4, 8, 10, 16, 20, 40}; /*!< Holds the di
   * This parameter can be any of the @ref CLK_Prescaler_TypeDef enumeration.
   * @retval None
   */
+void CLK_HSIPrescalerConfig(CLK_Prescaler_TypeDef HSIPrescaler)
+{
+  /* check the parameters */
+  assert_param(IS_CLK_HSIPRESCALER_OK(HSIPrescaler));
+
+  /* Clear High speed internal clock prescaler */
+  CLK->CKDIVR &= (uint8_t)(~CLK_CKDIVR_HSIDIV);
+
+  /* Set High speed internal clock prescaler */
+  CLK->CKDIVR |= (uint8_t)HSIPrescaler;
+}
 
 /**
   * @brief  Output the selected clock on a dedicated I/O pin.

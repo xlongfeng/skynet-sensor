@@ -39,7 +39,12 @@ void mdelay(uint32_t ms)
         watchdog();
 }
 
-void watchdog()
+void clk_init(void)
+{
+    CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV2);
+}
+
+void watchdog(void)
 {
     if (jiffies_to_msecs(jiffies) < (7UL * 24 * 60 * 60 * 1000))
         IWDG_ReloadCounter();
@@ -79,7 +84,7 @@ void uart_mode_receive(void)
 void uart_init(void)
 {
     UART1_DeInit();
-    UART1_Init(19200, UART1_WORDLENGTH_8D, UART1_STOPBITS_1, UART1_PARITY_NO, UART1_SYNCMODE_CLOCK_DISABLE, UART1_MODE_TXRX_ENABLE);
+    UART1_Init(38400, UART1_WORDLENGTH_8D, UART1_STOPBITS_1, UART1_PARITY_NO, UART1_SYNCMODE_CLOCK_DISABLE, UART1_MODE_TXRX_ENABLE);
     GPIO_Init(GPIOA, (GPIO_Pin_TypeDef)GPIO_PIN_1, GPIO_MODE_OUT_OD_LOW_SLOW);
     GPIO_Init(GPIOA, (GPIO_Pin_TypeDef)GPIO_PIN_2, GPIO_MODE_OUT_OD_LOW_SLOW);
 
@@ -94,7 +99,7 @@ void led_init(void)
 void tim_init(void)
 {
     TIM2_DeInit();
-    TIM2_TimeBaseInit(TIM2_PRESCALER_2, CONFIG_HZ);
+    TIM2_TimeBaseInit(TIM2_PRESCALER_8, CONFIG_HZ);
     TIM2_ITConfig(TIM2_IT_UPDATE, ENABLE);
     TIM2_Cmd(ENABLE);
 }
@@ -283,6 +288,7 @@ void device_switch(DeviceType type)
 
 void os_init(void)
 {
+    clk_init();
     iwdog_init();
     uart_init();
     led_init();

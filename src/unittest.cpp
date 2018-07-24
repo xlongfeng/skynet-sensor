@@ -129,7 +129,7 @@ TEST(CmdBufTest, CmdBuf) {
     EXPECT_EQ(cmdBufValidation(pCmd), CMD_BUF_OK);
 
     cmdBufReset(pCmd);
-    cmdBufPushString(pCmd, "@7e,SetID,01,4e\r\n");
+    cmdBufPushString(pCmd, "@7e,SetID,01,4e\n");
     cmdBufPushEnd(pCmd);
     EXPECT_GT(cmdBufSize(pCmd), 0);
     cmdBufGetAddr(pCmd, &addr);

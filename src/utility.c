@@ -132,7 +132,7 @@ void cmdBufGetArg(pCmdBuf pbuf, uint16_t *pArg)
         if (endptr != 0) {
             n = endptr - startptr;
             pbuf->rpos += n;
-            *pArg = (uint8_t)strtoul(startptr, 0, 16);
+            *pArg = (uint16_t)strtoul(startptr, 0, 16);
             return;
         }
     }
@@ -192,7 +192,7 @@ uint8_t cmdBufValidation(pCmdBuf pbuf)
     }
 }
 
-void cmdBufBuild(pCmdBuf pbuf, uint8_t addr, char *action, uint16_t arg)
+void cmdBufBuild(pCmdBuf pbuf, uint8_t addr, const char *action, uint16_t arg)
 {
     uint8_t n;
     n = sprintf_small(pbuf->buf, "@%x,%s,%x", addr, action, arg);

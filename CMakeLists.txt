@@ -14,6 +14,7 @@ else()
     set(CMAKE_C_FLAGS "-std=c11")
     set(CMAKE_CXX_FLAGS "-std=c++11")
     add_subdirectory(googletest)
+    add_subdirectory(toolkit)
 endif()
 
 add_subdirectory(src)
