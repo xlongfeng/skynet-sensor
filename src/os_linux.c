@@ -68,6 +68,11 @@ void os_init(void)
 #endif
 }
 
+void os_schedule(void)
+{
+
+}
+
 uint16_t query_device(void)
 {
     return 0x1234;

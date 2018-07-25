@@ -68,9 +68,9 @@ void led_heartbeat(void)
     }
 
     if (value)
-        GPIO_WriteLow(GPIOB, (GPIO_Pin_TypeDef)GPIO_PIN_5);
+        GPIO_WriteLow(GPIOB, GPIO_PIN_5);
     else
-        GPIO_WriteHigh(GPIOB, (GPIO_Pin_TypeDef)GPIO_PIN_5);
+        GPIO_WriteHigh(GPIOB, GPIO_PIN_5);
 }
 
 static CmdBuf cmd;
@@ -160,6 +160,6 @@ void main(void)
     for (;;) {
         led_heartbeat();
         cmd_transaction();
-        watchdog();
+        os_schedule();
     }
 }

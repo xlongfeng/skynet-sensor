@@ -135,7 +135,7 @@ void MainWin::on_getTypeButton_pressed()
 void MainWin::on_setTypeButton_pressed()
 {
     CmdBuf cmd;
-    cmdBufBuild(&cmd, deviceID(), "SetType", 1);
+    cmdBufBuild(&cmd, deviceID(), "SetType", deviceType());
     serialPort->write(cmd.buf);
     transactionTimeout->start(200);
 }
@@ -170,7 +170,10 @@ void MainWin::cmdTransaction(uint8_t id, char *action, uint16_t arg)
 {
     transactionTimeout->stop();
     if (strcmp(action, "Query") == 0) {
-        ui->queryLineEdit->setText(QString::number(arg));
+        if (deviceType() == 2)
+            ui->queryLineEdit->setText(QString::number(arg * 340 / 1000 / 2));
+        else
+            ui->queryLineEdit->setText(QString::number(arg));
     } else if (strcmp(action, "SetID") == 0) {
         ui->deviceIDLineEdit->setText(QString::number(arg));
     } else if (strcmp(action, "GetID") == 0) {

@@ -41,7 +41,7 @@ void mdelay(uint32_t ms)
 
 void clk_init(void)
 {
-    CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV2);
+    CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1);
 }
 
 void watchdog(void)
@@ -71,35 +71,35 @@ void iwdog_init(void)
 
 void uart_mode_transmit(void)
 {
-    GPIO_WriteHigh(GPIOA, (GPIO_Pin_TypeDef)GPIO_PIN_2);
-    GPIO_WriteHigh(GPIOA, (GPIO_Pin_TypeDef)GPIO_PIN_1);
+    GPIO_WriteHigh(GPIOA, GPIO_PIN_2);
+    GPIO_WriteHigh(GPIOA, GPIO_PIN_1);
 }
 
 void uart_mode_receive(void)
 {
-    GPIO_WriteLow(GPIOA, (GPIO_Pin_TypeDef)GPIO_PIN_1);
-    GPIO_WriteLow(GPIOA, (GPIO_Pin_TypeDef)GPIO_PIN_2);
+    GPIO_WriteLow(GPIOA, GPIO_PIN_1);
+    GPIO_WriteLow(GPIOA, GPIO_PIN_2);
 }
 
 void uart_init(void)
 {
     UART1_DeInit();
     UART1_Init(38400, UART1_WORDLENGTH_8D, UART1_STOPBITS_1, UART1_PARITY_NO, UART1_SYNCMODE_CLOCK_DISABLE, UART1_MODE_TXRX_ENABLE);
-    GPIO_Init(GPIOA, (GPIO_Pin_TypeDef)GPIO_PIN_1, GPIO_MODE_OUT_OD_LOW_SLOW);
-    GPIO_Init(GPIOA, (GPIO_Pin_TypeDef)GPIO_PIN_2, GPIO_MODE_OUT_OD_LOW_SLOW);
+    GPIO_Init(GPIOA, GPIO_PIN_1, GPIO_MODE_OUT_OD_LOW_SLOW);
+    GPIO_Init(GPIOA, GPIO_PIN_2, GPIO_MODE_OUT_OD_LOW_SLOW);
 
     uart_mode_receive();
 }
 
 void led_init(void)
 {
-    GPIO_Init(GPIOB, (GPIO_Pin_TypeDef)GPIO_PIN_5, GPIO_MODE_OUT_OD_LOW_SLOW);
+    GPIO_Init(GPIOB, GPIO_PIN_5, GPIO_MODE_OUT_OD_LOW_SLOW);
 }
 
 void tim_init(void)
 {
     TIM2_DeInit();
-    TIM2_TimeBaseInit(TIM2_PRESCALER_8, CONFIG_HZ);
+    TIM2_TimeBaseInit(TIM2_PRESCALER_16, CONFIG_HZ);
     TIM2_ITConfig(TIM2_IT_UPDATE, ENABLE);
     TIM2_Cmd(ENABLE);
 }
@@ -206,30 +206,30 @@ void reset_status(void)
 
 void waterlevel_disable(void)
 {
-    GPIO_Init(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);
-    GPIO_Init(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_2, GPIO_MODE_IN_FL_NO_IT);
-    GPIO_Init(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_1, GPIO_MODE_IN_FL_NO_IT);
-    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_7, GPIO_MODE_IN_FL_NO_IT);
-    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_6, GPIO_MODE_IN_FL_NO_IT);
-    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_5, GPIO_MODE_IN_FL_NO_IT);
-    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_4, GPIO_MODE_IN_FL_NO_IT);
-    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOD, GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOD, GPIO_PIN_2, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOD, GPIO_PIN_1, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOC, GPIO_PIN_7, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOC, GPIO_PIN_6, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOC, GPIO_PIN_5, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOC, GPIO_PIN_4, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOC, GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);
 
-    GPIO_Init(GPIOB, (GPIO_Pin_TypeDef)GPIO_PIN_4, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOB, GPIO_PIN_4, GPIO_MODE_IN_FL_NO_IT);
 }
 
 void waterlevel_enable(void)
 {
-    GPIO_Init(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_3, GPIO_MODE_IN_PU_NO_IT);
-    GPIO_Init(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_2, GPIO_MODE_IN_PU_NO_IT);
-    GPIO_Init(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_1, GPIO_MODE_IN_PU_NO_IT);
-    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_7, GPIO_MODE_IN_PU_NO_IT);
-    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_6, GPIO_MODE_IN_PU_NO_IT);
-    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_5, GPIO_MODE_IN_PU_NO_IT);
-    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_4, GPIO_MODE_IN_PU_NO_IT);
-    GPIO_Init(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_3, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOD, GPIO_PIN_3, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOD, GPIO_PIN_2, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOD, GPIO_PIN_1, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOC, GPIO_PIN_7, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOC, GPIO_PIN_6, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOC, GPIO_PIN_5, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOC, GPIO_PIN_4, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOC, GPIO_PIN_3, GPIO_MODE_IN_PU_NO_IT);
 
-    GPIO_Init(GPIOB, (GPIO_Pin_TypeDef)GPIO_PIN_4, GPIO_MODE_OUT_OD_LOW_SLOW);
+    GPIO_Init(GPIOB, GPIO_PIN_4, GPIO_MODE_OUT_OD_LOW_SLOW);
 }
 
 uint16_t query_waterlevel(void)
@@ -238,28 +238,28 @@ uint16_t query_waterlevel(void)
 
     waterlevel_enable();
 
-    if (GPIO_ReadInputPin(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_3) == RESET)
+    if (GPIO_ReadInputPin(GPIOC, GPIO_PIN_3) == RESET)
         value = 1;
 
-    if (GPIO_ReadInputPin(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_4) == RESET)
+    if (GPIO_ReadInputPin(GPIOC, GPIO_PIN_4) == RESET)
         value = 2;
 
-    if (GPIO_ReadInputPin(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_5) == RESET)
+    if (GPIO_ReadInputPin(GPIOC, GPIO_PIN_5) == RESET)
         value = 3;
 
-    if (GPIO_ReadInputPin(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_6) == RESET)
+    if (GPIO_ReadInputPin(GPIOC, GPIO_PIN_6) == RESET)
         value = 4;
 
-    if (GPIO_ReadInputPin(GPIOC, (GPIO_Pin_TypeDef)GPIO_PIN_7) == RESET)
+    if (GPIO_ReadInputPin(GPIOC, GPIO_PIN_7) == RESET)
         value = 5;
 
-    if (GPIO_ReadInputPin(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_1) == RESET)
+    if (GPIO_ReadInputPin(GPIOD, GPIO_PIN_1) == RESET)
         value = 6;
 
-    if (GPIO_ReadInputPin(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_2) == RESET)
+    if (GPIO_ReadInputPin(GPIOD, GPIO_PIN_2) == RESET)
         value = 7;
 
-    if (GPIO_ReadInputPin(GPIOD, (GPIO_Pin_TypeDef)GPIO_PIN_3) == RESET)
+    if (GPIO_ReadInputPin(GPIOD, GPIO_PIN_3) == RESET)
         value = 8;
 
     waterlevel_disable();
@@ -272,14 +272,99 @@ void waterlevel_init(void)
     waterlevel_disable();
 }
 
+#define waterlevel_deinit()       waterlevel_disable()
+
+typedef enum {
+    UltrasonicTriggerStart,
+    UltrasonicTriggerStop,
+    UltrasonicEchoWaitHigh,
+    UltrasonicEchoWaitLow,
+    UltrasonicComplete,
+} UltrasonicStage;
+
+static uint16_t ultrasonic_value;
+static UltrasonicStage stage = UltrasonicTriggerStart;
+static uint32_t delay_time;
+static uint32_t timeout;
+
+void ultrasonic_init(void)
+{
+    GPIO_Init(GPIOD, GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);
+    GPIO_Init(GPIOD, GPIO_PIN_2, GPIO_MODE_OUT_OD_LOW_SLOW);
+    GPIO_WriteLow(GPIOD, GPIO_PIN_2);
+    ultrasonic_value = 0xffff;
+    stage = UltrasonicTriggerStart;
+    delay_time = jiffies;
+}
+
+void ultrasonic_deinit(void)
+{
+    GPIO_Init(GPIOD, GPIO_PIN_3, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOD, GPIO_PIN_2, GPIO_MODE_IN_PU_NO_IT);
+}
+
+void ultrasonic_task(void)
+{
+    static uint32_t msec_from, usec_from;
+    static int16_t msec_to, usec_to;
+
+    if (time_before(jiffies, delay_time))
+        return;
+
+    if (time_after(jiffies, timeout)) {
+        stage = UltrasonicTriggerStart;
+    }
+
+    switch (stage) {
+    case UltrasonicTriggerStart:
+        delay_time = jiffies + msecs_to_jiffies(2);
+        timeout = jiffies + msecs_to_jiffies(100);
+        stage = UltrasonicTriggerStop;
+        GPIO_WriteHigh(GPIOD, GPIO_PIN_2);
+        break;
+    case UltrasonicTriggerStop:
+        stage = UltrasonicEchoWaitHigh;
+        GPIO_WriteLow(GPIOD, GPIO_PIN_2);
+        break;
+    case UltrasonicEchoWaitHigh:
+        if (GPIO_ReadInputPin(GPIOD, GPIO_PIN_3)) {
+            stage = UltrasonicEchoWaitLow;
+            msec_from = jiffies_to_msecs(jiffies);
+            usec_from = (int16_t)TIM2_GetCounter();
+        }
+        break;
+    case UltrasonicEchoWaitLow:
+        if (!GPIO_ReadInputPin(GPIOD, GPIO_PIN_3)) {
+            stage = UltrasonicComplete;
+            msec_to = jiffies_to_msecs(jiffies);
+            usec_to = (int16_t)TIM2_GetCounter();
+        }
+        break;
+    case UltrasonicComplete:
+    default:
+        stage = UltrasonicTriggerStart;
+        delay_time = jiffies + msecs_to_jiffies(1000);
+        ultrasonic_value = (uint16_t)((int32_t)((msec_to - msec_from) * 1000) + (usec_to - usec_from));
+        break;
+    }
+}
+
+uint16_t query_ultrasonic(void)
+{
+    return ultrasonic_value;
+}
+
 void device_switch(DeviceType type)
 {
+    waterlevel_deinit();
+    ultrasonic_deinit();
+
     switch (type) {
     case WaterLevelDevice:
         waterlevel_init();
         break;
     case UltrasonicDevice:
-        waterlevel_disable();
+        ultrasonic_init();
         break;
     default:
         break;
@@ -304,6 +389,20 @@ void os_init(void)
     enableInterrupts();
 }
 
+void os_schedule(void)
+{
+    switch (read_device_type()) {
+    case WaterLevelDevice:
+        break;
+    case UltrasonicDevice:
+        ultrasonic_task();
+        break;
+    default:
+        break;
+    }
+    watchdog();
+}
+
 uint16_t query_device(void)
 {
     uint16_t value = 0xffff;
@@ -313,6 +412,7 @@ uint16_t query_device(void)
         value = query_waterlevel();
         break;
     case UltrasonicDevice:
+        value = query_ultrasonic();
         break;
     default:
         break;

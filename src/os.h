@@ -102,6 +102,7 @@ uint8_t read_device_type(void);
 
 void device_switch(DeviceType type);
 void os_init(void);
+void os_schedule(void);
 
 #ifdef	__cplusplus
 }

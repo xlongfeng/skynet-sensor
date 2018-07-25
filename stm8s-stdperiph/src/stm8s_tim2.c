@@ -472,6 +472,14 @@ void TIM2_ITConfig(TIM2_IT_TypeDef TIM2_IT, FunctionalState NewState)
   * @param  None
   * @retval Counter Register value.
   */
+uint16_t TIM2_GetCounter(void)
+{
+  uint16_t tmpcntr = 0;
+
+  tmpcntr =  ((uint16_t)TIM2->CNTRH << 8);
+  /* Get the Counter Register value */
+  return (uint16_t)( tmpcntr| (uint16_t)(TIM2->CNTRL));
+}
 
 /**
   * @brief  Gets the TIM2 Prescaler value.
