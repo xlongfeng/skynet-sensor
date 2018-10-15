@@ -31,6 +31,8 @@
 #define CONFIG_CLK_MASTER       (CONFIG_CLK_HSI)
 #define CONFIG_HZ               (HZ)
 
+void device_switch(DeviceType type);
+
 void mdelay(uint32_t ms)
 {
     uint32_t delay = jiffies + msecs_to_jiffies(ms);
@@ -133,6 +135,8 @@ void write_device_type(uint8_t type)
     FLASH_WaitForLastOperation(FLASH_MEMTYPE_DATA);
     FLASH_ProgramByte(FLASH_TYPE_NE_ADDR, (uint8_t)~type);
     FLASH_WaitForLastOperation(FLASH_MEMTYPE_DATA);
+
+    device_switch(type);
 }
 
 uint8_t read_device_type(void)
@@ -206,20 +210,6 @@ void reset_status(void)
 
 void waterlevel_disable(void)
 {
-    GPIO_Init(GPIOD, GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);
-    GPIO_Init(GPIOD, GPIO_PIN_2, GPIO_MODE_IN_FL_NO_IT);
-    GPIO_Init(GPIOD, GPIO_PIN_1, GPIO_MODE_IN_FL_NO_IT);
-    GPIO_Init(GPIOC, GPIO_PIN_7, GPIO_MODE_IN_FL_NO_IT);
-    GPIO_Init(GPIOC, GPIO_PIN_6, GPIO_MODE_IN_FL_NO_IT);
-    GPIO_Init(GPIOC, GPIO_PIN_5, GPIO_MODE_IN_FL_NO_IT);
-    GPIO_Init(GPIOC, GPIO_PIN_4, GPIO_MODE_IN_FL_NO_IT);
-    GPIO_Init(GPIOC, GPIO_PIN_3, GPIO_MODE_IN_FL_NO_IT);
-
-    GPIO_Init(GPIOB, GPIO_PIN_4, GPIO_MODE_IN_FL_NO_IT);
-}
-
-void waterlevel_enable(void)
-{
     GPIO_Init(GPIOD, GPIO_PIN_3, GPIO_MODE_IN_PU_NO_IT);
     GPIO_Init(GPIOD, GPIO_PIN_2, GPIO_MODE_IN_PU_NO_IT);
     GPIO_Init(GPIOD, GPIO_PIN_1, GPIO_MODE_IN_PU_NO_IT);
@@ -229,7 +219,52 @@ void waterlevel_enable(void)
     GPIO_Init(GPIOC, GPIO_PIN_4, GPIO_MODE_IN_PU_NO_IT);
     GPIO_Init(GPIOC, GPIO_PIN_3, GPIO_MODE_IN_PU_NO_IT);
 
-    GPIO_Init(GPIOB, GPIO_PIN_4, GPIO_MODE_OUT_OD_LOW_SLOW);
+    GPIO_Init(GPIOB, GPIO_PIN_4, GPIO_MODE_IN_PU_NO_IT);
+}
+
+void waterlevel_enable(void)
+{
+    GPIO_Init(GPIOD, GPIO_PIN_3, GPIO_MODE_OUT_OD_HIZ_FAST);
+    GPIO_Init(GPIOD, GPIO_PIN_2, GPIO_MODE_OUT_OD_HIZ_FAST);
+    GPIO_Init(GPIOD, GPIO_PIN_1, GPIO_MODE_OUT_OD_HIZ_FAST);
+    GPIO_Init(GPIOC, GPIO_PIN_7, GPIO_MODE_OUT_OD_HIZ_FAST);
+    GPIO_Init(GPIOC, GPIO_PIN_6, GPIO_MODE_OUT_OD_HIZ_FAST);
+    GPIO_Init(GPIOC, GPIO_PIN_5, GPIO_MODE_OUT_OD_HIZ_FAST);
+    GPIO_Init(GPIOC, GPIO_PIN_4, GPIO_MODE_OUT_OD_HIZ_FAST);
+    GPIO_Init(GPIOC, GPIO_PIN_3, GPIO_MODE_OUT_OD_HIZ_FAST);
+
+    GPIO_Init(GPIOB, GPIO_PIN_4, GPIO_MODE_IN_PU_NO_IT);
+}
+
+void nops(void)
+{
+    nop();
+    nop();
+    nop();
+    nop();
+    nop();
+    nop();
+    nop();
+    nop();
+}
+
+bool waterlevel_sensor_read(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef GPIO_Pin)
+{
+    BitStatus bit_low, bit_high;
+
+    GPIO_Init(GPIOx, GPIO_Pin, GPIO_MODE_OUT_PP_LOW_SLOW);
+
+    nops();
+    bit_low = GPIO_ReadInputPin(GPIOB, GPIO_PIN_4);
+
+    GPIO_Init(GPIOx, GPIO_Pin, GPIO_MODE_OUT_PP_HIGH_SLOW);
+
+    nops();
+    bit_high = GPIO_ReadInputPin(GPIOB, GPIO_PIN_4);
+
+    GPIO_Init(GPIOx, GPIO_Pin, GPIO_MODE_OUT_OD_HIZ_FAST);
+
+    return (bit_low == RESET) && (bit_high == SET);
 }
 
 uint16_t query_waterlevel(void)
@@ -238,28 +273,28 @@ uint16_t query_waterlevel(void)
 
     waterlevel_enable();
 
-    if (GPIO_ReadInputPin(GPIOC, GPIO_PIN_3) == RESET)
+    if (waterlevel_sensor_read(GPIOC, GPIO_PIN_3))
         value = 1;
 
-    if (GPIO_ReadInputPin(GPIOC, GPIO_PIN_4) == RESET)
+    if (waterlevel_sensor_read(GPIOC, GPIO_PIN_4))
         value = 2;
 
-    if (GPIO_ReadInputPin(GPIOC, GPIO_PIN_5) == RESET)
+    if (waterlevel_sensor_read(GPIOC, GPIO_PIN_5))
         value = 3;
 
-    if (GPIO_ReadInputPin(GPIOC, GPIO_PIN_6) == RESET)
+    if (waterlevel_sensor_read(GPIOC, GPIO_PIN_6))
         value = 4;
 
-    if (GPIO_ReadInputPin(GPIOC, GPIO_PIN_7) == RESET)
+    if (waterlevel_sensor_read(GPIOC, GPIO_PIN_7))
         value = 5;
 
-    if (GPIO_ReadInputPin(GPIOD, GPIO_PIN_1) == RESET)
+    if (waterlevel_sensor_read(GPIOD, GPIO_PIN_1))
         value = 6;
 
-    if (GPIO_ReadInputPin(GPIOD, GPIO_PIN_2) == RESET)
+    if (waterlevel_sensor_read(GPIOD, GPIO_PIN_2))
         value = 7;
 
-    if (GPIO_ReadInputPin(GPIOD, GPIO_PIN_3) == RESET)
+    if (waterlevel_sensor_read(GPIOD, GPIO_PIN_3))
         value = 8;
 
     waterlevel_disable();
